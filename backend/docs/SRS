@@ -1,0 +1,56 @@
+# SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
+
+## EventHub – Event Ticketing and Venue Access
+
+**Document Version:** 1.0  
+**Project Type:** Capstone Project
+
+---
+
+# 1. Introduction
+
+## 1.1 Purpose
+
+This Software Requirements Specification defines the functional and non-functional requirements, architecture, database requirements, interfaces, security requirements and testing requirements of the EventHub system.
+
+---
+
+## 1.2 Product Scope
+
+EventHub is a web-based event ticketing and venue access system.
+
+The system allows users to:
+
+- View events.
+- View event details.
+- Check ticket availability.
+- Book tickets.
+- View booking information.
+- Submit contact messages.
+
+The backend is implemented using Node.js and Express and uses MySQL for persistent storage.
+
+---
+
+# 2. Overall Description
+
+## 2.1 Product Perspective
+
+EventHub follows a layered backend architecture.
+
+The major flow is:
+
+```text
+Frontend
+   ↓
+REST API
+   ↓
+Routes
+   ↓
+Controllers
+   ↓
+Services
+   ↓
+DAO
+   ↓
+MySQL

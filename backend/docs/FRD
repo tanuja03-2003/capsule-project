@@ -1,0 +1,266 @@
+# FUNCTIONAL REQUIREMENTS DOCUMENT (FRD)
+
+## EventHub – Event Ticketing and Venue Access
+
+**Document Version:** 1.0  
+**Project Type:** Capstone Project
+
+---
+
+# 1. Introduction
+
+The Functional Requirements Document describes the functionalities that the EventHub system should provide.
+
+EventHub is a web-based event ticketing system where users can view events, check ticket availability and create bookings.
+
+The frontend communicates with the Node.js and Express backend through REST APIs.
+
+The backend uses MySQL for persistent data storage.
+
+---
+
+# 2. System Overview
+
+The system consists of:
+
+- Frontend
+- Node.js backend
+- Express REST APIs
+- Services
+- Controllers
+- Data Access Objects (DAO)
+- Models
+- MySQL database
+- Testing layer
+
+The basic communication flow is:
+
+Frontend
+↓
+REST API
+↓
+Express Routes
+↓
+Controllers
+↓
+Services
+↓
+DAO
+↓
+MySQL Database
+
+---
+
+# 3. User Roles
+
+## 3.1 User / Attendee
+
+A user can:
+
+- View available events.
+- View event details.
+- Select an event.
+- Request tickets.
+- Provide booking information.
+- Create a booking when tickets are available.
+- Submit contact messages.
+
+---
+
+## 3.2 Admin / Organizer
+
+An administrator or organizer can manage event-related information and booking information according to the implemented administrative capabilities.
+
+---
+
+# 4. Functional Requirements
+
+| ID | Function | Requirement |
+|---|---|---|
+| FR-01 | View Events | The system shall return a list of events. |
+| FR-02 | View Event | The system shall return details for a selected event by ID. |
+| FR-03 | Create Booking | The system shall accept a valid event ID, person name and positive ticket quantity. |
+| FR-04 | Booking Validation | The system shall reject invalid booking information. |
+| FR-05 | Availability Check | The system shall verify ticket availability before creating a booking. |
+| FR-06 | Update Availability | The system shall decrease available tickets after successful booking. |
+| FR-07 | View Bookings | The system shall provide booking records. |
+| FR-08 | Contact Management | The system shall validate and store contact messages. |
+| FR-09 | Error Handling | The system shall return appropriate HTTP status codes and error messages. |
+| FR-10 | Database Persistence | The system shall use MySQL for persistent data storage when the database is available. |
+
+---
+
+# 5. Event Management
+
+The system shall provide functionality to:
+
+1. Retrieve all available events.
+2. Retrieve an individual event using its ID.
+3. Display event name.
+4. Display event description.
+5. Display event date.
+6. Display event time.
+7. Display ticket price.
+8. Display available tickets.
+9. Display venue-related information.
+
+---
+
+# 6. Ticket Booking
+
+The booking process shall work as follows:
+
+1. The user selects an event.
+2. The user enters their name.
+3. The user enters the number of tickets.
+4. The system validates the request.
+5. The system verifies that the event exists.
+6. The system checks available tickets.
+7. If enough tickets are available, the booking is created.
+8. The available ticket count is reduced.
+9. The booking information is returned to the user.
+
+---
+
+# 7. Booking Validation
+
+The system shall validate:
+
+### Event ID
+
+The event ID must:
+
+- Be provided.
+- Be an integer.
+- Be greater than zero.
+- Exist in the database.
+
+### Person Name
+
+The person name:
+
+- Must be provided.
+- Must not be empty.
+- Must be a valid string.
+
+### Number of Tickets
+
+The ticket quantity:
+
+- Must be provided.
+- Must be an integer.
+- Must be greater than zero.
+- Must not exceed available tickets.
+
+---
+
+# 8. Booking Error Handling
+
+| Scenario | HTTP Status |
+|---|---|
+| Invalid request | 400 Bad Request |
+| Event does not exist | 404 Not Found |
+| Insufficient tickets | 409 Conflict |
+| Booking does not exist | 404 Not Found |
+
+---
+
+# 9. API Requirements
+
+The following APIs are currently implemented:
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/events` | Retrieve all events |
+| GET | `/api/events/:id` | Retrieve one event |
+| GET | `/api/bookings` | Retrieve bookings |
+| GET | `/api/bookings/:id` | Retrieve booking by ID |
+| POST | `/api/bookings` | Create a booking |
+| GET | `/api/contacts` | Retrieve contact messages |
+| POST | `/api/contacts` | Submit contact message |
+| GET | `/health` | Check backend status |
+
+---
+
+# 10. Contact Management
+
+The system shall allow users to submit contact messages.
+
+The following information shall be validated:
+
+- Name
+- Email
+- Message
+
+The email must have a valid email format.
+
+Empty names or messages shall be rejected.
+
+---
+
+# 11. Database Requirements
+
+The current database contains the following core tables:
+
+## Users
+
+Stores user information such as:
+
+- ID
+- Name
+- Email
+- Phone
+- Created date
+
+## Events
+
+Stores:
+
+- Event ID
+- Event name
+- Description
+- Venue ID
+- Event date
+- Event time
+- Price
+- Image URL
+- Available tickets
+
+## Bookings
+
+Stores booking-related information such as:
+
+- Booking ID
+- User ID
+- Event ID
+- Number of tickets
+- Total amount
+- Booking date
+- Booking status
+
+## Venues
+
+Stores venue-related information.
+
+## Tickets
+
+Stores ticket-related information.
+
+## Contacts
+
+Stores contact form submissions.
+
+---
+
+# 12. Testing Requirements
+
+The system should include:
+
+## Unit Testing
+
+Unit tests verify individual functions or business logic in isolation.
+
+Example:
+
+```text
+Booking service rejects numberOfTickets = 0

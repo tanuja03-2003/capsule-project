@@ -1,0 +1,165 @@
+# BUSINESS REQUIREMENTS DOCUMENT (BRD)
+
+## EventHub – Event Ticketing and Venue Access
+
+**Document Version:** 1.0  
+**Project Type:** Capstone Project
+
+---
+
+# 1. Business Problem
+
+EventHub provides a centralized platform for viewing events, managing ticket availability, and creating bookings.
+
+Manual or disconnected processes can make it difficult to view event information, track available tickets, and maintain booking records.
+
+The EventHub system addresses this problem by providing a web-based event ticketing and venue access platform backed by a relational MySQL database.
+
+---
+
+# 2. Business Objectives
+
+The main objectives of the EventHub system are:
+
+- Allow users to view available events.
+- Allow users to view detailed information about events.
+- Allow users to book tickets for available events.
+- Check ticket availability before creating a booking.
+- Maintain booking and ticket availability information in MySQL.
+- Maintain relationships between users, events, venues, bookings, and tickets.
+- Provide REST APIs for communication between frontend and backend.
+- Validate user requests and provide meaningful error messages.
+- Maintain consistent and reliable booking information.
+
+---
+
+# 3. Project Scope
+
+## 3.1 In Scope
+
+The following functionalities are included in the current system:
+
+- Event listing.
+- Event details.
+- User information storage.
+- Venue and event information.
+- Ticket booking.
+- Ticket availability checking.
+- Booking information management.
+- Contact/message submission.
+- REST API-based backend.
+- MySQL database integration.
+- Unit testing.
+- API testing.
+- Integration testing.
+
+---
+
+## 3.2 Out of Scope
+
+The following features are not part of the current core implementation:
+
+- Online payment gateway integration.
+- Production-grade authentication and identity verification.
+- Physical access-control hardware integration.
+- Advanced analytics.
+- Recommendation systems.
+
+These features can be added as future enhancements.
+
+---
+
+# 4. Stakeholders
+
+| Stakeholder | Responsibility |
+|---|---|
+| User / Attendee | View events and book tickets |
+| Event Organizer / Admin | Manage event, venue and booking information |
+| Development Team | Develop, test and maintain the application |
+| Database / Infrastructure Support | Maintain database and runtime infrastructure |
+
+---
+
+# 5. Business Requirements
+
+| ID | Business Requirement | Priority |
+|---|---|---|
+| BR-01 | Users shall be able to view available events. | High |
+| BR-02 | The system shall display event details such as name, date, time, price and availability. | High |
+| BR-03 | Users shall be able to book tickets when sufficient tickets are available. | High |
+| BR-04 | The system shall reject invalid ticket quantities and bookings exceeding availability. | High |
+| BR-05 | Valid bookings shall be stored persistently. | High |
+| BR-06 | The system shall maintain user, event, venue, ticket, booking and contact information. | High |
+| BR-07 | The backend shall provide REST APIs. | Medium |
+| BR-08 | The system shall return appropriate errors for invalid requests. | Medium |
+
+---
+
+# 6. Business Rules
+
+The following business rules apply:
+
+1. A booking must reference a valid event.
+2. The number of tickets requested must be a positive integer.
+3. A user cannot book more tickets than are available.
+4. A successful booking must update the available ticket count.
+5. Invalid booking requests must not create invalid booking records.
+6. Event information must be stored and retrieved consistently.
+7. Booking information must be maintained in the database.
+
+---
+
+# 7. Assumptions
+
+The system assumes that:
+
+- Users have access to a web browser.
+- The backend is running and accessible.
+- The MySQL database is configured correctly.
+- Event and venue information is available in the database.
+- Users provide valid information while making requests.
+- The application is initially developed and tested in a local environment.
+
+---
+
+# 8. Constraints
+
+The current project has the following constraints:
+
+- The system depends on MySQL for persistent data storage.
+- The current implementation is primarily intended for development and demonstration.
+- Payment integration is not currently implemented.
+- Advanced authentication and authorization are not currently implemented.
+- Physical venue access hardware is not integrated.
+
+---
+
+# 9. Expected Benefits
+
+The EventHub system provides the following benefits:
+
+- Centralized event and booking information.
+- Easier ticket availability tracking.
+- Reduced manual booking management.
+- Better data consistency.
+- Clear separation between frontend, backend and database.
+- REST-based communication between system components.
+- A foundation for future features such as registration, authentication, payment and venue access.
+
+---
+
+# 10. Future Enhancements
+
+Possible future enhancements include:
+
+- User registration and login.
+- Authentication and authorization.
+- Online payment integration.
+- Booking cancellation and refunds.
+- QR-code-based digital tickets.
+- Venue access control.
+- Admin dashboard.
+- Event management functionality.
+- Cloud deployment.
+- Monitoring and logging.
+- CI/CD pipeline.

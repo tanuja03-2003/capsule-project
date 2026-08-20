@@ -1,0 +1,235 @@
+{
+  "events": [
+    {
+      "id": 1,
+      "name": "Summer Music Festival",
+      "description": "A vibrant outdoor concert featuring top artists.",
+      "location": "Green Park",
+      "event_date": "2026-08-20",
+      "event_time": "19:00",
+      "price": 75,
+      "image_url": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f",
+      "available_tickets": 67
+    },
+    {
+      "id": 2,
+      "name": "Tech Innovation Expo",
+      "description": "Explore the future of technology and AI.",
+      "location": "Innovation Center",
+      "event_date": "2026-09-15",
+      "event_time": "10:00",
+      "price": 45,
+      "image_url": "https://images.unsplash.com/photo-1511578314322-379afb476865",
+      "available_tickets": 92
+    },
+    {
+      "id": 3,
+      "name": "Cultural Heritage Night",
+      "description": "An evening celebrating art, dance, and tradition.",
+      "location": "City Hall Arena",
+      "event_date": "2026-10-05",
+      "event_time": "18:30",
+      "price": 30,
+      "image_url": "https://images.unsplash.com/photo-1501386761578-eac5c94b800a",
+      "available_tickets": 99
+    }
+  ],
+  "bookings": [
+    {
+      "id": 1,
+      "event_id": 1,
+      "customer_name": "Demo User",
+      "email": "demo@example.com",
+      "tickets_count": 2,
+      "total_amount": 150,
+      "booking_date": "2026-08-10T17:39:13.993Z",
+      "status": "CONFIRMED",
+      "person_name": "Demo User"
+    },
+    {
+      "id": 2,
+      "event_id": 1,
+      "number_of_tickets": 2,
+      "booking_date": "2026-08-10T17:47:00.382Z",
+      "person_name": "Guest",
+      "customer_name": "Guest"
+    },
+    {
+      "id": 3,
+      "event_id": 1,
+      "number_of_tickets": 2,
+      "booking_date": "2026-08-10T17:47:25.750Z",
+      "person_name": "Guest",
+      "customer_name": "Guest"
+    },
+    {
+      "id": 4,
+      "event_id": 1,
+      "number_of_tickets": 3,
+      "booking_date": "2026-08-10T17:49:04.534Z",
+      "person_name": "Guest",
+      "customer_name": "Guest"
+    },
+    {
+      "id": 5,
+      "event_id": 1,
+      "number_of_tickets": 3,
+      "booking_date": "2026-08-10T17:55:50.633Z",
+      "person_name": "Guest",
+      "customer_name": "Guest"
+    },
+    {
+      "id": 6,
+      "event_id": 1,
+      "number_of_tickets": 2,
+      "booking_date": "2026-08-10T18:01:28.926Z",
+      "person_name": "Guest",
+      "customer_name": "Guest"
+    },
+    {
+      "id": 7,
+      "event_id": 1,
+      "number_of_tickets": 2,
+      "booking_date": "2026-08-10T18:02:20.736Z",
+      "person_name": "Guest",
+      "customer_name": "Guest"
+    },
+    {
+      "id": 8,
+      "event_id": 1,
+      "person_name": "Tanuja",
+      "customer_name": "Tanuja",
+      "number_of_tickets": 2,
+      "booking_date": "2026-08-10T18:04:57.497Z"
+    },
+    {
+      "id": 9,
+      "event_id": 1,
+      "number_of_tickets": 3,
+      "booking_date": "2026-08-10T18:05:11.376Z",
+      "person_name": "Guest",
+      "customer_name": "Guest"
+    },
+    {
+      "id": 10,
+      "event_id": 1,
+      "person_name": "Tanuja",
+      "customer_name": "Tanuja",
+      "number_of_tickets": 3,
+      "booking_date": "2026-08-10T18:06:03.686Z"
+    },
+    {
+      "id": 11,
+      "event_id": 2,
+      "person_name": "Tanuja",
+      "customer_name": "Tanuja",
+      "number_of_tickets": 3,
+      "booking_date": "2026-08-10T18:08:00.898Z"
+    },
+    {
+      "id": 12,
+      "event_id": 1,
+      "person_name": "pruthvi",
+      "customer_name": "pruthvi",
+      "number_of_tickets": 1,
+      "booking_date": "2026-08-10T18:11:04.740Z"
+    },
+    {
+      "id": 13,
+      "event_id": 1,
+      "person_name": "Ram",
+      "customer_name": "Ram",
+      "number_of_tickets": 2,
+      "booking_date": "2026-08-11T06:12:51.034Z"
+    },
+    {
+      "id": 14,
+      "event_id": 1,
+      "person_name": "arya",
+      "customer_name": "arya",
+      "number_of_tickets": 3,
+      "booking_date": "2026-08-11T07:56:43.695Z"
+    },
+    {
+      "id": 15,
+      "event_id": 1,
+      "person_name": "arya",
+      "customer_name": "arya",
+      "number_of_tickets": 3,
+      "booking_date": "2026-08-11T08:58:16.045Z"
+    },
+    {
+      "id": 16,
+      "event_id": 1,
+      "person_name": "Tanuja",
+      "customer_name": "Tanuja",
+      "number_of_tickets": 2,
+      "booking_date": "2026-08-15T05:39:57.975Z"
+    },
+    {
+      "id": 17,
+      "event_id": 1,
+      "person_name": "Tanuja",
+      "customer_name": "Tanuja",
+      "number_of_tickets": 2,
+      "booking_date": "2026-08-15T14:53:36.135Z",
+      "status": "CONFIRMED"
+    },
+    {
+      "id": 18,
+      "event_id": 1,
+      "person_name": "Tanuja",
+      "customer_name": "Tanuja",
+      "number_of_tickets": 2,
+      "booking_date": "2026-08-16T02:36:05.762Z",
+      "status": "CONFIRMED"
+    },
+    {
+      "id": 19,
+      "event_id": 1,
+      "person_name": "Tanuja",
+      "customer_name": "Tanuja",
+      "number_of_tickets": 2,
+      "booking_date": "2026-08-16T02:40:16.331Z",
+      "status": "CONFIRMED"
+    },
+    {
+      "id": 20,
+      "event_id": 1,
+      "person_name": "Tanuja",
+      "customer_name": "Tanuja",
+      "number_of_tickets": 2,
+      "booking_date": "2026-08-16T02:51:12.886Z",
+      "status": "CONFIRMED"
+    },
+    {
+      "id": 21,
+      "event_id": 2,
+      "person_name": "Sanvi",
+      "customer_name": "Sanvi",
+      "number_of_tickets": 5,
+      "booking_date": "2026-08-18T16:04:26.099Z",
+      "status": "CONFIRMED"
+    },
+    {
+      "id": 22,
+      "event_id": 3,
+      "person_name": "Sanvi",
+      "customer_name": "Sanvi",
+      "number_of_tickets": 1,
+      "booking_date": "2026-08-18T16:07:01.961Z",
+      "status": "CONFIRMED"
+    },
+    {
+      "id": 23,
+      "event_id": 3,
+      "person_name": "Sanvi",
+      "customer_name": "Sanvi",
+      "number_of_tickets": 1,
+      "total_amount": 30,
+      "booking_date": "2026-08-18T16:17:07.431Z",
+      "status": "CONFIRMED"
+    }
+  ],
+  "contacts": []
+}
