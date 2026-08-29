@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Tickets | EventHub</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="container nav">
+    <a class="logo" href="index.html">Event<span>Hub</span></a>
+    <div class="search">
+      <span class="search-icon">⌕</span>
+      <input id="globalSearch" placeholder="Search for events, venues and more">
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="events.html">Events</a>
+      <a href="my-tickets.html">My Tickets</a>
+      <a href="features.html">Features</a>
+      <a class="btn btn-primary" href="events.html">Book Now</a>
+    </nav>
+    <button class="mobile-menu" aria-label="Open menu">☰</button>
+  </div>
+</header>
+<main>
+<section id="bookingRoot">
+  <div class="container page-title">
+    <h1>Book Tickets</h1>
+    <p id="bookingDate"></p>
+  </div>
+  <div class="container booking-layout">
+    <div>
+      <div class="steps"><div class="step active">1. Select seats</div><div class="step">2. Customer details</div><div class="step">3. Confirmation</div></div>
+      <div class="card">
+        <h2 id="bookingEvent">Event</h2>
+        <div class="screen" style="margin-top:30px">SCREEN / STAGE</div>
+        <div id="seatGrid" class="seat-grid"></div>
+        <p style="text-align:center;color:#777;font-size:13px">Grey seats are already booked. You can select up to 6 seats.</p>
+      </div>
+      <div class="card" style="margin-top:20px">
+        <h3>Customer details</h3>
+        <form id="bookingForm" style="margin-top:16px">
+          <div class="form-row">
+            <div class="field"><label>Full name</label><input id="customerName" required placeholder="Enter your name"></div>
+            <div class="field"><label>Email</label><input id="customerEmail" type="email" required placeholder="you@example.com"></div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:18px">Confirm Booking</button>
+        </form>
+        <div id="bookingResult" style="margin-top:15px"></div>
+      </div>
+    </div>
+    <aside class="card" style="height:max-content;position:sticky;top:90px">
+      <h3>Booking summary</h3>
+      <div class="summary-line"><span>Event</span><strong id="summaryEvent">Ticket</strong></div>
+      <div class="summary-line"><span>Seats</span><span id="selectedSeats">No seats selected</span></div>
+      <div class="summary-line"><span>Ticket price</span><span>Based on event</span></div>
+      <div class="summary-total"><span>Total</span><span id="total">₹0</span></div>
+    </aside>
+  </div>
+</section>
+</main>
+<footer class="footer">
+  <div class="container footer-grid">
+    <div>
+      <h3>EventHub</h3>
+      <p>A simple event ticketing and venue access platform for discovering events, booking seats and validating entry.</p>
+    </div>
+    <div><h4>Explore</h4><a href="events.html">All Events</a><a href="features.html">Features</a><a href="my-tickets.html">My Tickets</a></div>
+    <div><h4>Company</h4><a href="about.html">About</a><a href="contact.html">Contact</a></div>
+    <div><h4>Help</h4><a href="contact.html">Support</a><a href="events.html">Browse Events</a></div>
+  </div>
+  <div class="container footer-bottom">© <span data-year></span> EventHub. Capsule Project.</div>
+</footer>
+<div id="toast" class="toast"></div>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script src="js/booking.js"></script>
+</body>
+</html>

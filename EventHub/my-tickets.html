@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Events | EventHub</title>
+  <title>My Tickets | EventHub</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -25,20 +25,13 @@
   </div>
 </header>
 <main>
-<div class="container page-title">
-  <h1>Events</h1>
-  <p>Find your next experience.</p>
-</div>
-<section class="section" style="padding-top:0">
+<section class="section">
   <div class="container">
-    <div class="filters">
-      <div class="field"><label>Search</label><input id="searchInput" placeholder="Event, venue or category"></div>
-      <div class="field"><label>Category</label><select id="categoryFilter"><option value="">All categories</option><option>Music</option><option>Comedy</option><option>Conference</option><option>Festival</option><option>Business</option><option>Arts</option><option>Sports</option></select></div>
-      <div class="field"><label>City</label><select id="cityFilter"><option value="">All cities</option><option>Bengaluru</option></select></div>
-      <div class="field"><label>Sort by</label><select id="sortFilter"><option value="">Recommended</option><option value="priceLow">Price: Low to High</option><option value="priceHigh">Price: High to Low</option><option value="rating">Top Rated</option></select></div>
+    <div class="page-title" style="padding-top:0">
+      <h1>My Ticket</h1>
+      <p>Your latest confirmed EventHub booking.</p>
     </div>
-    <div class="section-head"><div><h2>Available events</h2><p id="resultCount"></p></div></div>
-    <div id="eventGrid" class="event-grid"></div>
+    <div id="ticketRoot"></div>
   </div>
 </section>
 </main>
@@ -57,6 +50,6 @@
 <div id="toast" class="toast"></div>
 <script src="js/api.js"></script>
 <script src="js/app.js"></script>
-<script src="js/events.js"></script>
+<script src="js/tickets.js"></script>
 </body>
 </html>
