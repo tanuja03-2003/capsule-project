@@ -76,14 +76,31 @@ async function ensureMysqlSchema() {
     `);
 
     await activePool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INT NOT NULL AUTO_INCREMENT,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_users_email (email)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    await activePool.query(`
       CREATE TABLE IF NOT EXISTS bookings (
         id INT NOT NULL AUTO_INCREMENT,
+        user_id INT NULL,
         event_id INT NOT NULL,
         person_name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NULL,
         number_of_tickets INT NOT NULL,
+        total_amount DECIMAL(10,2) DEFAULT 0,
         booking_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+        status VARCHAR(50) DEFAULT 'CONFIRMED',
         PRIMARY KEY (id),
-        KEY idx_event_id (event_id)
+        KEY idx_event_id (event_id),
+        KEY idx_user_id (user_id),
+        CONSTRAINT fk_bookings_event FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
@@ -99,20 +116,26 @@ async function ensureMysqlSchema() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
-    const [eventRows] = await activePool.query('SELECT COUNT(*) AS total FROM events');
-    if (Number(eventRows[0].total) === 0) {
-      await activePool.query(`
-        INSERT INTO events (name, description, location, event_date, event_time, price, image_url, available_tickets)
-        VALUES
-          ('Summer Music Festival', 'A vibrant outdoor concert featuring top artists.', 'Green Park', '2026-08-20', '19:00:00', 75.00, 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f', 100),
-          ('Tech Innovation Expo', 'Explore the future of technology and AI.', 'Innovation Center', '2026-09-15', '10:00:00', 45.00, 'https://images.unsplash.com/photo-1511578314322-379afb476865', 80),
-          ('Cultural Heritage Night', 'An evening celebrating art, dance, and tradition.', 'City Hall Arena', '2026-10-05', '18:30:00', 30.00, 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a', 60);
-      `);
+    const schemaColumns = [
+      ['users', 'email', 'ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(255) NULL AFTER name'],
+      ['bookings', 'user_id', 'ALTER TABLE bookings ADD COLUMN IF NOT EXISTS user_id INT NULL AFTER id'],
+      ['bookings', 'email', 'ALTER TABLE bookings ADD COLUMN IF NOT EXISTS email VARCHAR(255) NULL AFTER person_name'],
+      ['bookings', 'total_amount', 'ALTER TABLE bookings ADD COLUMN IF NOT EXISTS total_amount DECIMAL(10,2) DEFAULT 0 AFTER number_of_tickets'],
+      ['bookings', 'status', 'ALTER TABLE bookings ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT "CONFIRMED" AFTER booking_date']
+    ];
+
+    for (const [tableName, columnName, statement] of schemaColumns) {
+      try {
+        await activePool.query(statement);
+      } catch (error) {
+        if (!String(error.message).includes('Duplicate column name') && !String(error.message).includes('already exists')) {
+          console.warn(`Schema migration warning for ${tableName}.${columnName}:`, error.message);
+        }
+      }
     }
 
     return true;
   } catch (error) {
-    //console.warn('MySQL schema initialization failed, falling back to JSON storage:', error.message);
     console.warn('MySQL schema initialization failed:', error);
     return false;
   }

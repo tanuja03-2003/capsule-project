@@ -28,6 +28,24 @@ test('POST /api/bookings rejects zero tickets', async () => {
   assert.equal(response.status, 400);
   assert.equal(response.body.success, false);
 });
+
+test('POST /api/bookings accepts the frontend contract payload', async () => {
+  const response = await request(app)
+    .post('/api/bookings')
+    .send({
+      eventId: 1,
+      customerName: 'Frontend User',
+      email: 'frontend@example.com',
+      ticketsCount: 2,
+      totalAmount: 150,
+      status: 'CONFIRMED'
+    });
+
+  assert.equal(response.status, 201);
+  assert.equal(response.body.success, true);
+  assert.ok(response.body.booking);
+});
+
 test.after(async () => {
   const pool = getPool();
 

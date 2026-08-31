@@ -3,7 +3,7 @@ const { body, param, query, validationResult } = require('express-validator');
 const eventController = require('../controllers/eventController');
 const bookingController = require('../controllers/bookingController');
 const contactController = require('../controllers/contactController');
-
+const venueAccessController = require('../controllers/venueAccessController');
 const router = express.Router();
 
 function validateRequest(req, res, next) {
@@ -24,14 +24,25 @@ router.post('/bookings', [
     .isInt({ min: 1 })
     .withMessage('Event id must be a positive integer'),
 
-  body('personName')
+  body(['personName', 'customerName'])
+    .optional({ checkFalsy: true })
     .trim()
-    .notEmpty()
-    .withMessage('personName is required and cannot be empty'),
+    .isLength({ min: 1 })
+    .withMessage('customerName or personName is required'),
 
-  body('numberOfTickets')
-    .isInt({ min: 1 })
-    .withMessage('numberOfTickets must be at least 1')
+  body(['numberOfTickets', 'ticketsCount'])
+    .custom((value, { req }) => {
+      const ticketCount = Number(value ?? req.body.numberOfTickets ?? req.body.ticketsCount);
+      if (!Number.isInteger(ticketCount) || ticketCount <= 0) {
+        throw new Error('numberOfTickets or ticketsCount must be a positive integer');
+      }
+      return true;
+    }),
+
+  body('email')
+    .optional({ checkFalsy: true })
+    .isEmail()
+    .withMessage('Valid email format is required when provided')
 ], validateRequest, bookingController.createBooking);
 
 router.get('/contacts', contactController.getAllMessages);
@@ -40,5 +51,17 @@ router.post('/contacts', [
   body('email').isEmail().withMessage('Valid email is required'),
   body('message').notEmpty().trim().withMessage('Message is required')
 ], validateRequest, contactController.submitContact);
+
+
+router.post(
+    '/access/verify',
+    [
+        body('ticketId')
+            .isInt({ min: 1 })
+            .withMessage('Ticket ID must be a positive integer')
+    ],
+    validateRequest,
+    venueAccessController.verifyTicket
+);
 
 module.exports = router;

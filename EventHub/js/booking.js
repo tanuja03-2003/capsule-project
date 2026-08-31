@@ -60,13 +60,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const booking = await createBooking({
-      eventId: event.id,
-      eventName: event.title,
-      seats: selected,
-      customerName: document.querySelector("#customerName").value,
-      customerEmail: document.querySelector("#customerEmail").value,
-      amount: selected.length * seatPrice
-    });
+  eventId: event.id,
+  eventName: event.title,
+  seats: selected,
+  customerName: document.querySelector("#customerName").value,
+  customerEmail: document.querySelector("#customerEmail").value,
+  amount: selected.length * seatPrice,
+  numberOfTickets: selected.length
+});
 
     localStorage.setItem("lastBooking", JSON.stringify({
       ...booking,

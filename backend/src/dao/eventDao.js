@@ -9,100 +9,81 @@ function getBookedTicketsForEvent(data, eventId) {
 
 async function findAll() {
   const pool = getPool();
-  if (pool) {
-    try {
-      const [rows] = await pool.query(`
-        SELECT e.*, COALESCE(SUM(b.number_of_tickets), 0) AS booked_tickets
-        FROM events e
-        LEFT JOIN bookings b ON b.event_id = e.id
-        GROUP BY e.id
-        ORDER BY e.id ASC
-      `);
-
-      return rows.map((row) => new Event({
-        id: row.id,
-        name: row.name,
-        description: row.description,
-        location: row.location,
-        eventDate: row.event_date,
-        eventTime: row.event_time,
-        price: row.price,
-        imageUrl: row.image_url,
-        availableTickets: Number(row.available_tickets ?? 0),
-        bookedTickets: Number(row.booked_tickets ?? 0)
-      }));
-    } catch (error) {
-      console.warn('MySQL event query failed, falling back to JSON storage:', error.message);
-    }
+  if (!pool) {
+    const error = new Error('MySQL is not available');
+    error.statusCode = 500;
+    throw error;
   }
 
-  const data = readDatabase();
-  return (data.events || []).map((row) => new Event({
-    id: row.id,
-    name: row.name,
-    description: row.description,
-    location: row.location,
-    eventDate: row.event_date,
-    eventTime: row.event_time,
-    price: row.price,
-    imageUrl: row.image_url,
-    availableTickets: row.available_tickets ?? row.availableTickets ?? 100,
-    bookedTickets: getBookedTicketsForEvent(data, row.id)
-  }));
+  try {
+    const [rows] = await pool.query(`
+      SELECT e.*, COALESCE(SUM(b.number_of_tickets), 0) AS booked_tickets
+      FROM events e
+      LEFT JOIN bookings b ON b.event_id = e.id
+      GROUP BY e.id
+      ORDER BY e.id ASC
+    `);
+
+    return rows.map((row) => new Event({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      location: row.location,
+      eventDate: row.event_date,
+      eventTime: row.event_time,
+      price: row.price,
+      imageUrl: row.image_url,
+      availableTickets: Number(row.available_tickets ?? 0),
+      bookedTickets: Number(row.booked_tickets ?? 0)
+    }));
+  } catch (error) {
+    const wrappedError = new Error('Events could not be loaded from MySQL');
+    wrappedError.statusCode = 500;
+    wrappedError.cause = error;
+    throw wrappedError;
+  }
 }
 
 async function findById(id) {
   const pool = getPool();
-  if (pool) {
-    try {
-      const [rows] = await pool.query(`
-        SELECT e.*, COALESCE(SUM(b.number_of_tickets), 0) AS booked_tickets
-        FROM events e
-        LEFT JOIN bookings b ON b.event_id = e.id
-        WHERE e.id = ?
-        GROUP BY e.id
-      `, [id]);
+  if (!pool) {
+    const error = new Error('MySQL is not available');
+    error.statusCode = 500;
+    throw error;
+  }
 
-      const row = rows[0];
-      if (!row) {
-        return null;
-      }
+  try {
+    const [rows] = await pool.query(`
+      SELECT e.*, COALESCE(SUM(b.number_of_tickets), 0) AS booked_tickets
+      FROM events e
+      LEFT JOIN bookings b ON b.event_id = e.id
+      WHERE e.id = ?
+      GROUP BY e.id
+    `, [id]);
 
-      return new Event({
-        id: row.id,
-        name: row.name,
-        description: row.description,
-        location: row.location,
-        eventDate: row.event_date,
-        eventTime: row.event_time,
-        price: row.price,
-        imageUrl: row.image_url,
-        availableTickets: Number(row.available_tickets ?? 0),
-        bookedTickets: Number(row.booked_tickets ?? 0)
-      });
-    } catch (error) {
-      console.warn('MySQL event lookup failed, falling back to JSON storage:', error.message);
+    const row = rows[0];
+    if (!row) {
+      return null;
     }
-  }
 
-  const data = readDatabase();
-  const row = (data.events || []).find((event) => event.id === Number(id));
-  if (!row) {
-    return null;
+    return new Event({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      location: row.location,
+      eventDate: row.event_date,
+      eventTime: row.event_time,
+      price: row.price,
+      imageUrl: row.image_url,
+      availableTickets: Number(row.available_tickets ?? 0),
+      bookedTickets: Number(row.booked_tickets ?? 0)
+    });
+  } catch (error) {
+    const wrappedError = new Error('Event could not be loaded from MySQL');
+    wrappedError.statusCode = 500;
+    wrappedError.cause = error;
+    throw wrappedError;
   }
-
-  return new Event({
-    id: row.id,
-    name: row.name,
-    description: row.description,
-    location: row.location,
-    eventDate: row.event_date,
-    eventTime: row.event_time,
-    price: row.price,
-    imageUrl: row.image_url,
-    availableTickets: row.available_tickets ?? row.availableTickets ?? 100,
-    bookedTickets: getBookedTicketsForEvent(data, row.id)
-  });
 }
 
 module.exports = {

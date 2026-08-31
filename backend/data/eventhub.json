@@ -9,7 +9,7 @@
       "event_time": "19:00",
       "price": 75,
       "image_url": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f",
-      "available_tickets": 67
+      "available_tickets": 63
     },
     {
       "id": 2,
@@ -228,6 +228,28 @@
       "number_of_tickets": 1,
       "total_amount": 30,
       "booking_date": "2026-08-18T16:17:07.431Z",
+      "status": "CONFIRMED"
+    },
+    {
+      "id": 24,
+      "event_id": 1,
+      "person_name": "Frontend User",
+      "customer_name": "Frontend User",
+      "email": "frontend@example.com",
+      "number_of_tickets": 2,
+      "total_amount": 150,
+      "booking_date": "2026-08-26T14:04:49.401Z",
+      "status": "CONFIRMED"
+    },
+    {
+      "id": 25,
+      "event_id": 1,
+      "person_name": "Frontend User",
+      "customer_name": "Frontend User",
+      "email": "frontend@example.com",
+      "number_of_tickets": 2,
+      "total_amount": 150,
+      "booking_date": "2026-08-26T14:05:04.928Z",
       "status": "CONFIRMED"
     }
   ],
