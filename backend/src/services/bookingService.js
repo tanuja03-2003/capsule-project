@@ -1,12 +1,21 @@
 const bookingDao = require('../dao/bookingDao');
+
 const eventService = require('./eventService');
 const venueAccessService = require('./venueAccessService');
 const notificationService = require('./notificationService');
-const paymentService = require('./paymentService');
+
+// Circuit Breaker
+const {
+    paymentBreaker
+} = require('../utils/circuitBreaker');
+
 
 async function bookTickets(booking) {
 
+    // ------------------------------------------------
     // 1. Validate event ID
+    // ------------------------------------------------
+
     if (
         !booking ||
         !Number.isInteger(booking.eventId) ||
@@ -17,57 +26,93 @@ async function bookTickets(booking) {
         throw error;
     }
 
+
+    // ------------------------------------------------
     // 2. Get number of tickets
+    // ------------------------------------------------
+
     const requestedTickets = Number(
         booking.numberOfTickets ??
         booking.ticketsCount ??
         0
     );
 
+
+    // ------------------------------------------------
     // 3. Get customer name
+    // ------------------------------------------------
+
     const personName = (
         booking.personName ??
         booking.customerName ??
         ''
     ).toString().trim();
 
+
+    // ------------------------------------------------
     // 4. Get customer email
+    // ------------------------------------------------
+
     const email = (
         booking.email ??
         booking.customerEmail ??
         ''
     ).toString().trim();
 
+
+    // ------------------------------------------------
     // 5. Validate customer name
+    // ------------------------------------------------
+
     if (!personName) {
+
         const error = new Error(
             'customerName or personName is required and cannot be empty'
         );
+
         error.statusCode = 400;
+
         throw error;
     }
 
+
+    // ------------------------------------------------
     // 6. Validate number of tickets
+    // ------------------------------------------------
+
     if (
         !Number.isInteger(requestedTickets) ||
         requestedTickets <= 0
     ) {
+
         const error = new Error(
             'numberOfTickets must be a positive integer'
         );
+
         error.statusCode = 400;
+
         throw error;
     }
 
+
+    // ------------------------------------------------
     // 7. Validate email
+    // ------------------------------------------------
+
     if (
         email &&
         !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     ) {
-        const error = new Error('Email format is invalid');
+
+        const error = new Error(
+            'Email format is invalid'
+        );
+
         error.statusCode = 400;
+
         throw error;
     }
+
 
     // ------------------------------------------------
     // 8. Get event
@@ -78,10 +123,14 @@ async function bookTickets(booking) {
     );
 
     if (!event) {
+
         const error = new Error('Event not found');
+
         error.statusCode = 404;
+
         throw error;
     }
+
 
     // ------------------------------------------------
     // 9. Check ticket availability
@@ -92,37 +141,52 @@ async function bookTickets(booking) {
     );
 
     if (available < requestedTickets) {
+
         const error = new Error(
             'Not enough tickets available'
         );
+
         error.statusCode = 409;
+
         throw error;
     }
+
 
     // ------------------------------------------------
     // 10. Calculate total amount
     // ------------------------------------------------
 
-    const price = Number(event.price ?? 0);
+    const price = Number(
+        event.price ?? 0
+    );
 
     const totalAmount = Number(
         booking.totalAmount ??
         price * requestedTickets
     );
 
+
     // ------------------------------------------------
     // 11. Prepare booking data
     // ------------------------------------------------
 
     const normalizedBooking = {
+
         eventId: booking.eventId,
+
         personName: personName,
+
         email: email,
+
         numberOfTickets: requestedTickets,
+
         totalAmount: totalAmount,
+
         bookingDate: new Date(),
+
         status: booking.status || 'CONFIRMED'
     };
+
 
     // ------------------------------------------------
     // 12. Create booking in MONOLITHIC DATABASE
@@ -138,34 +202,74 @@ async function bookTickets(booking) {
         bookingId
     );
 
-    // 6. Call Payment Microservice
 
-try {
-
-    const paymentResponse =
-        await paymentService.createPayment(
-            bookingId,
-            totalAmount
-        );
-
-    console.log(
-        'Payment successful:',
-        paymentResponse.data
-    );
-
-} catch (error) {
-
-    console.error(
-        'Payment Microservice failed:',
-        error.message
-    );
-}
-
-    // ------------------------------------------------
-    // 13. Call VENUE ACCESS MICROSERVICE
-    // ------------------------------------------------
+    // =================================================
+    // 13. CALL PAYMENT MICROSERVICE
+    //     USING CIRCUIT BREAKER
+    // =================================================
 
     try {
+
+        console.log(
+            'Calling Payment Microservice through Circuit Breaker...'
+        );
+
+        const paymentData = await paymentBreaker.fire(
+
+            'http://localhost:3002/api/payments',
+
+            {
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+
+                body: JSON.stringify({
+
+                    bookingId: bookingId,
+
+                    amount: totalAmount
+                })
+            }
+        );
+
+
+        console.log(
+            'Payment Microservice response:',
+            paymentData
+        );
+
+
+        console.log(
+            'Payment successful:',
+            paymentData
+        );
+
+    } catch (error) {
+
+        console.error(
+            'Payment Microservice failed:',
+            error.message
+        );
+
+        // IMPORTANT:
+        // Circuit breaker prevents repeated calls
+        // when Payment Service is unavailable.
+        //
+        // For your current demo, booking continues.
+    }
+
+
+    // =================================================
+    // 14. CALL VENUE ACCESS MICROSERVICE
+    // =================================================
+
+    try {
+
+        console.log(
+            'Calling Venue Access Microservice...'
+        );
 
         await venueAccessService.createAccessTicket({
 
@@ -174,8 +278,8 @@ try {
             eventId: booking.eventId,
 
             customerName: personName
-
         });
+
 
         console.log(
             'Access ticket created successfully:',
@@ -189,18 +293,22 @@ try {
             error.message
         );
 
-        // Important:
         // Booking still succeeds even if
         // Venue Access Microservice is unavailable.
     }
 
-    // ------------------------------------------------
-    // 14. Call NOTIFICATION MICROSERVICE
-    // ------------------------------------------------
+
+    // =================================================
+    // 15. CALL NOTIFICATION MICROSERVICE
+    // =================================================
 
     if (email) {
 
         try {
+
+            console.log(
+                'Calling Notification Microservice...'
+            );
 
             await notificationService.sendNotification(
 
@@ -209,6 +317,7 @@ try {
                 `Your booking has been confirmed successfully. Booking ID: ${bookingId}`
 
             );
+
 
             console.log(
                 'Notification sent successfully'
@@ -221,15 +330,15 @@ try {
                 error.message
             );
 
-            // Important:
             // Booking still succeeds even if
             // Notification Microservice is unavailable.
         }
     }
 
-    // ------------------------------------------------
-    // 15. Return booking response
-    // ------------------------------------------------
+
+    // =================================================
+    // 16. Return booking response
+    // =================================================
 
     return {
 
@@ -246,7 +355,6 @@ try {
         totalAmount: totalAmount,
 
         status: normalizedBooking.status
-
     };
 }
 
@@ -258,7 +366,6 @@ try {
 async function getAllBookings() {
 
     return bookingDao.findAll();
-
 }
 
 
@@ -269,7 +376,6 @@ async function getAllBookings() {
 async function getBookingById(id) {
 
     return bookingDao.findById(id);
-
 }
 
 
@@ -284,5 +390,4 @@ module.exports = {
     getAllBookings,
 
     getBookingById
-
 };

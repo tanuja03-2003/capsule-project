@@ -4,10 +4,10 @@
   "description": "Node.js Express backend migrated from the Spring Boot EventHub backend",
   "main": "src/server.js",
   "scripts": {
-  "start": "node src/server.js",
-  "dev": "nodemon src/server.js",
- "test": "node --test --test-concurrency=1 test/api.test.js test/bookingService.test.js test/integration.test.js"
-},
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "node --test --test-concurrency=1 test/api.test.js test/bookingService.test.js test/integration.test.js"
+  },
   "keywords": [
     "express",
     "mysql",
@@ -20,7 +20,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-validator": "^7.0.1",
-    "mysql2": "^3.23.3"
+    "mysql2": "^3.23.3",
+    "opossum": "^10.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.0",
