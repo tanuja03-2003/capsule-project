@@ -1,0 +1,190 @@
+version: '3.8'
+
+networks:
+  capsule-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+
+services:
+  # ========================================================
+  # 1. NGINX Ingress / Reverse Proxy (External Entry Point)
+  # ========================================================
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    container_name: capsule-nginx
+    ports:
+      - "${NGINX_PORT:-8080}:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - capsule-network
+    restart: unless-stopped
+
+  # ========================================================
+  # 2. API Gateway (Internal Entry Point for APIs)
+  # ========================================================
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: capsule-api-gateway
+    expose:
+      - "8000"
+    environment:
+      - PORT=8000
+      - NODE_ENV=production
+      - EVENT_SERVICE_URL=http://backend:3000
+      - BOOKING_SERVICE_URL=http://backend:3000
+      - PAYMENT_SERVICE_URL=http://payment-service:3002
+      - VENUE_ACCESS_SERVICE_URL=http://venue-access-service:3001
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3003
+      - RATE_LIMIT_WINDOW_MS=60000
+      - RATE_LIMIT_MAX_REQUESTS=100
+      - GATEWAY_TIMEOUT_MS=10000
+    depends_on:
+      - backend
+      - payment-service
+      - venue-access-service
+      - notification-service
+    networks:
+      - capsule-network
+    restart: unless-stopped
+
+  # ========================================================
+  # 3. Core Backend (Hosts Event & Booking Services)
+  # ========================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: capsule-backend
+    expose:
+      - "3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=eventhub
+      - DB_USER=root
+      - DB_PASSWORD=Ishu@12345
+      - USE_MYSQL=true
+      - PAYMENT_SERVICE_URL=http://payment-service:3002
+      - VENUE_ACCESS_SERVICE_URL=http://venue-access-service:3001
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3003
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - capsule-network
+    restart: unless-stopped
+
+  # ========================================================
+  # 4. Payment Microservice
+  # ========================================================
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: capsule-payment-service
+    expose:
+      - "3002"
+    environment:
+      - PORT=3002
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=Ishu@12345
+      - DB_NAME=payment_db
+      - SERVICE_REGISTRY_URL=http://service-registry:3005
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - capsule-network
+    restart: unless-stopped
+
+  # ========================================================
+  # 5. Venue Access Microservice
+  # ========================================================
+  venue-access-service:
+    build:
+      context: ./venue-access-service
+      dockerfile: Dockerfile
+    container_name: capsule-venue-access-service
+    expose:
+      - "3001"
+    environment:
+      - PORT=3001
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=Ishu@12345
+      - DB_NAME=venue_access_db
+      - SERVICE_REGISTRY_URL=http://service-registry:3005
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - capsule-network
+    restart: unless-stopped
+
+  # ========================================================
+  # 6. Notification Microservice
+  # ========================================================
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: capsule-notification-service
+    expose:
+      - "3003"
+    environment:
+      - PORT=3003
+      - SERVICE_REGISTRY_URL=http://service-registry:3005
+    networks:
+      - capsule-network
+    restart: unless-stopped
+
+  # ========================================================
+  # 7. Service Registry
+  # ========================================================
+  service-registry:
+    build:
+      context: ./service-registry
+      dockerfile: Dockerfile
+    container_name: capsule-service-registry
+    expose:
+      - "3005"
+    environment:
+      - PORT=3005
+    networks:
+      - capsule-network
+    restart: unless-stopped
+
+  # ========================================================
+  # 8. MySQL Database
+  # ========================================================
+  mysql:
+    image: mysql:8.0
+    container_name: capsule-mysql
+    expose:
+      - "3306"
+   
+    environment:
+      - MYSQL_ROOT_PASSWORD=Ishu@12345
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - capsule-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pIshu@12345"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped

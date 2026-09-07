@@ -1,4 +1,4 @@
-const PAYMENT_SERVICE_URL = 'http://localhost:3002';
+const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://localhost:3002';
 
 async function createPayment(bookingId, amount) {
 

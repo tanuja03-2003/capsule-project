@@ -1,4 +1,4 @@
-const VENUE_ACCESS_SERVICE_URL = 'http://localhost:3001';
+const VENUE_ACCESS_SERVICE_URL = process.env.VENUE_ACCESS_SERVICE_URL || 'http://localhost:3001';
 
 async function verifyTicket(ticketId) {
 

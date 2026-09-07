@@ -116,23 +116,38 @@ async function ensureMysqlSchema() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
-    const schemaColumns = [
-      ['users', 'email', 'ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(255) NULL AFTER name'],
-      ['bookings', 'user_id', 'ALTER TABLE bookings ADD COLUMN IF NOT EXISTS user_id INT NULL AFTER id'],
-      ['bookings', 'email', 'ALTER TABLE bookings ADD COLUMN IF NOT EXISTS email VARCHAR(255) NULL AFTER person_name'],
-      ['bookings', 'total_amount', 'ALTER TABLE bookings ADD COLUMN IF NOT EXISTS total_amount DECIMAL(10,2) DEFAULT 0 AFTER number_of_tickets'],
-      ['bookings', 'status', 'ALTER TABLE bookings ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT "CONFIRMED" AFTER booking_date']
-    ];
+  const schemaColumns = [
+  ['users', 'email', 'ALTER TABLE users ADD COLUMN email VARCHAR(255) NULL AFTER name'],
+  ['bookings', 'user_id', 'ALTER TABLE bookings ADD COLUMN user_id INT NULL AFTER id'],
+  ['bookings', 'email', 'ALTER TABLE bookings ADD COLUMN email VARCHAR(255) NULL AFTER person_name'],
+  ['bookings', 'total_amount', 'ALTER TABLE bookings ADD COLUMN total_amount DECIMAL(10,2) DEFAULT 0 AFTER number_of_tickets'],
+  ['bookings', 'status', 'ALTER TABLE bookings ADD COLUMN status VARCHAR(50) DEFAULT "CONFIRMED" AFTER booking_date']
+];
 
-    for (const [tableName, columnName, statement] of schemaColumns) {
-      try {
-        await activePool.query(statement);
-      } catch (error) {
-        if (!String(error.message).includes('Duplicate column name') && !String(error.message).includes('already exists')) {
-          console.warn(`Schema migration warning for ${tableName}.${columnName}:`, error.message);
-        }
-      }
+for (const [tableName, columnName, statement] of schemaColumns) {
+  try {
+    const [columns] = await activePool.query(
+      `
+      SELECT COLUMN_NAME
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = ?
+        AND COLUMN_NAME = ?
+      `,
+      [tableName, columnName]
+    );
+
+    if (columns.length === 0) {
+      await activePool.query(statement);
+      console.log(`Added missing column ${tableName}.${columnName}`);
     }
+  } catch (error) {
+    console.warn(
+      `Schema migration warning for ${tableName}.${columnName}:`,
+      error.message
+    );
+  }
+}
 
     return true;
   } catch (error) {
