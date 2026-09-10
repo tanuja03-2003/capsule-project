@@ -117,14 +117,29 @@ pipeline {
 
         stage('Unit Tests') {
             steps {
-                sh '''
-                    set -eu
-                    npm --prefix backend test
-                    npm --prefix api-gateway test
-                    node --check notification-service/src/worker.js
-                    node --check notification-service/src/redis.js
-                    node --check notification-service/src/services/notificationService.js
-                '''
+                withCredentials([
+                    string(
+                        credentialsId: 'eventhub-mysql-password',
+                        variable: 'MYSQL_PASSWORD'
+                    )
+                ]) {
+                    withEnv([
+                        'DB_HOST=capsule-mysql',
+                        'DB_PORT=3306',
+                        'DB_NAME=eventhub',
+                        'DB_USER=root',
+                        'DB_PASSWORD=' + env.MYSQL_PASSWORD
+                    ]) {
+                        sh '''
+                            set -eu
+                            npm --prefix backend test
+                            npm --prefix api-gateway test
+                            node --check notification-service/src/worker.js
+                            node --check notification-service/src/redis.js
+                            node --check notification-service/src/services/notificationService.js
+                        '''
+                    }
+                }
             }
         }
 
