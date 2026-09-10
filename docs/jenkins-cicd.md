@@ -18,6 +18,18 @@ The Kubernetes deployment stage updates only the existing `backend` and `notific
 
 ## Jenkins Requirements
 
+The custom Jenkins image is maintained outside this EventHub repository at:
+
+```text
+C:\Users\tankc\jenkins-custom\Dockerfile
+```
+
+That Dockerfile preserves the Publicis/Netskope CA, JDK 21, Docker CLI, and
+kubectl 1.36.1, and installs Node.js 20 LTS/npm. The running image was verified
+with Node `20.19.2`, npm `9.2.0`, kubectl `v1.36.1`, Docker, Git, curl, and Java
+21. TLS access to `https://updates.jenkins.io` also succeeded without bypassing
+certificate validation.
+
 The Jenkins agent needs:
 
 - Git
@@ -47,7 +59,17 @@ docker-registry-credentials
 
 The username/password must be for the configured registry. Do not put credentials in the Jenkinsfile, Dockerfiles, Kubernetes manifests, or repository files.
 
-Kubernetes access must be configured on the Jenkins agent using its kubeconfig/context, or through the `KUBE_CONTEXT` parameter. The agent identity needs permission to apply the namespace/backend/worker manifests, update the two application Deployments, read rollout status, and port-forward the backend Service.
+Kubernetes access uses the existing mounted kubeconfig at
+`/var/jenkins_home/.kube/config` and the existing Docker Desktop context
+`docker-desktop`. The Jenkins container also uses Docker Desktop's daemon with:
+
+```text
+DOCKER_HOST=tcp://host.docker.internal:2375
+```
+
+Do not replace this access method. The agent identity needs permission to apply
+the namespace/backend/worker manifests, update the two application Deployments,
+read rollout status, and port-forward the backend Service.
 
 ## Job Configuration
 
@@ -121,3 +143,21 @@ kubectl apply --dry-run=client -f k8s/namespace.yaml -f k8s/backend/service.yaml
 ```
 
 A real registry push and Kubernetes deployment require Jenkins credentials, a Docker daemon, registry access, and a Jenkins kubeconfig with suitable RBAC permissions.
+
+## Rebuild the Jenkins Image
+
+Run these commands from PowerShell when the custom Jenkins image needs to be
+rebuilt. They do not start, stop, or delete the existing Jenkins container:
+
+```powershell
+docker build -t jenkins-publicis:lts-jdk21 C:\Users\tankc\jenkins-custom
+```
+
+After rebuilding, recreate or replace the Jenkins container manually with the
+same existing mounts, environment, Docker daemon access, and kubeconfig mount.
+The EventHub pipeline itself does not manage the Jenkins container.
+
+The notification-worker image naming is intentional: Kubernetes uses the
+existing `capstone_event_ticketingandvenueaccess-notification-service` image
+and starts it with `node src/worker.js`. The Jenkinsfile builds and deploys
+that same image for the worker; no service rename is required.

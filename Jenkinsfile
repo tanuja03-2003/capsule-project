@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     options {
-        timestamps()
+
         disableConcurrentBuilds()
         skipDefaultCheckout(true)
     }
@@ -214,7 +214,6 @@ pipeline {
 
                     sh """
                         set -eu
-                        kubectl ${kubectlContext} apply -f k8s/namespace.yaml
                         kubectl ${kubectlContext} apply -f k8s/backend/service.yaml -f k8s/backend/deployment.yaml
                         kubectl ${kubectlContext} apply -f k8s/notification-worker/deployment.yaml
                         kubectl ${kubectlContext} set image deployment/backend backend=${backendImage} -n ${env.KUBE_NAMESPACE}
