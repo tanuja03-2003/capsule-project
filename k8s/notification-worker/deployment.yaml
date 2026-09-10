@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: notification-worker
+  namespace: eventhub
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: notification-worker
+
+  template:
+    metadata:
+      labels:
+        app: notification-worker
+
+    spec:
+      containers:
+        - name: notification-worker
+          image: capstone_event_ticketingandvenueaccess-notification-service:latest
+          imagePullPolicy: IfNotPresent
+
+          command:
+            - node
+            - src/worker.js
+
+          env:
+            - name: REDIS_HOST
+              value: redis
+
+            - name: REDIS_PORT
+              value: "6379"
+
+            - name: NOTIFICATION_STREAM
+              value: notifications
+
+            - name: NOTIFICATION_CONSUMER_GROUP
+              value: notification-workers
+
+            - name: NOTIFICATION_TEST_DELAY_MS
+              value: "0"
+
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"

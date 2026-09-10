@@ -310,17 +310,21 @@ async function bookTickets(booking) {
                 'Calling Notification Microservice...'
             );
 
-            await notificationService.sendNotification(
+            const notificationResult = await notificationService.sendNotification(
 
                 email,
-
-                `Your booking has been confirmed successfully. Booking ID: ${bookingId}`
+                `Your booking has been confirmed successfully. Booking ID: ${bookingId}`,
+                {
+                    bookingId,
+                    eventId: booking.eventId
+                }
 
             );
 
 
             console.log(
-                'Notification sent successfully'
+                'Notification queued successfully:',
+                notificationResult.messageId
             );
 
         } catch (error) {

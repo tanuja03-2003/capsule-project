@@ -76,9 +76,14 @@ services:
       - PAYMENT_SERVICE_URL=http://payment-service:3002
       - VENUE_ACCESS_SERVICE_URL=http://venue-access-service:3001
       - NOTIFICATION_SERVICE_URL=http://notification-service:3003
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NOTIFICATION_STREAM=notifications
     depends_on:
       mysql:
         condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - capsule-network
     restart: unless-stopped
@@ -150,6 +155,23 @@ services:
       - capsule-network
     restart: unless-stopped
 
+  notification-worker:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: capsule-notification-worker
+    command: node src/worker.js
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NOTIFICATION_STREAM=notifications
+      - NOTIFICATION_CONSUMER_GROUP=notification-workers
+    depends_on:
+      - redis
+    networks:
+      - capsule-network
+    restart: unless-stopped
+
   # ========================================================
   # 7. Service Registry
   # ========================================================
@@ -187,4 +209,14 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    container_name: capsule-redis
+    expose:
+      - "6379"
+    networks:
+      - capsule-network
+    command: ["redis-server", "--appendonly", "no"]
     restart: unless-stopped

@@ -1,37 +1,53 @@
-const NOTIFICATION_SERVICE_URL = 'http://localhost:3003';
+const Redis = require('ioredis');
 
-async function sendNotification(email, message) {
+const REDIS_HOST = process.env.REDIS_HOST || 'localhost';
+const REDIS_PORT = Number(process.env.REDIS_PORT || 6379);
+const NOTIFICATION_STREAM = process.env.NOTIFICATION_STREAM || 'notifications';
 
-    console.log('Calling Notification Microservice...');
-    console.log(
-        `URL: ${NOTIFICATION_SERVICE_URL}/api/notifications/send`
-    );
+async function publishNotification(event) {
 
-    const response = await fetch(
-        `${NOTIFICATION_SERVICE_URL}/api/notifications/send`,
-        {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email,
-                message
-            })
-        }
-    );
+    const redis = new Redis({
+        host: REDIS_HOST,
+        port: REDIS_PORT,
+        connectTimeout: 1000,
+        maxRetriesPerRequest: 1,
+        retryStrategy: () => null
+    });
 
-    const data = await response.json();
+    redis.on('error', () => {});
 
-    console.log(
-        'Response from Notification Microservice:',
-        data
-    );
+    try {
 
-    return {
-        status: response.status,
-        data
-    };
+        const messageId = await redis.xadd(
+            NOTIFICATION_STREAM,
+            'MAXLEN',
+            '~',
+            10000,
+            '*',
+            'payload',
+            JSON.stringify(event)
+        );
+
+        return {
+            status: 'QUEUED',
+            messageId
+        };
+
+    } finally {
+
+        redis.disconnect();
+    }
+}
+
+async function sendNotification(email, message, details = {}) {
+
+    return publishNotification({
+        type: 'TICKET_BOOKED',
+        bookingId: details.bookingId,
+        eventId: details.eventId,
+        email,
+        message
+    });
 }
 
 module.exports = {
