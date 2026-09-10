@@ -161,12 +161,12 @@ pipeline {
             steps {
                 script {
                     def images = [
-                        [name: 'api-gateway', context: 'api-gateway', dockerfile: 'Dockerfile'],
-                        [name: 'backend', context: 'backend', dockerfile: 'Dockerfile'],
-                        [name: 'notification-service', context: 'notification-service', dockerfile: 'Dockerfile'],
-                        [name: 'payment-service', context: 'payment-service', dockerfile: 'Dockerfile'],
-                        [name: 'venue-access-service', context: 'venue-access-service', dockerfile: 'Dockerfile'],
-                        [name: 'service-registry', context: 'service-registry', dockerfile: 'Dockerfile'],
+                        [name: 'api-gateway', context: 'api-gateway', dockerfile: 'api-gateway/Dockerfile'],
+                        [name: 'backend', context: 'backend', dockerfile: 'backend/Dockerfile'],
+                        [name: 'notification-service', context: 'notification-service', dockerfile: 'notification-service/Dockerfile'],
+                        [name: 'payment-service', context: 'payment-service', dockerfile: 'payment-service/Dockerfile'],
+                        [name: 'venue-access-service', context: 'venue-access-service', dockerfile: 'venue-access-service/Dockerfile'],
+                        [name: 'service-registry', context: 'service-registry', dockerfile: 'service-registry/Dockerfile'],
                         [name: 'nginx', context: '.', dockerfile: 'nginx/Dockerfile']
                     ]
 
