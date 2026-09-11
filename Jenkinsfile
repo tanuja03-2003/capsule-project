@@ -177,6 +177,14 @@ pipeline {
             }
         }
 
+        stage('Deployment Status') {
+            steps {
+                echo "Docker Push: ${params.PUSH_IMAGES ? 'enabled' : 'skipped because PUSH_IMAGES=false'}"
+                echo "Kubernetes Deployment: ${params.DEPLOY_TO_K8S ? 'enabled' : 'skipped because DEPLOY_TO_K8S=false'}"
+                echo 'Existing deployment conditions and pipeline behavior are unchanged.'
+            }
+        }
+
         stage('Docker Push') {
             when {
                 expression { params.PUSH_IMAGES }
