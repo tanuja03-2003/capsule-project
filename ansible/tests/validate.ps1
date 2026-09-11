@@ -32,8 +32,13 @@ function Invoke-Test {
 foreach ($command in @('ansible', 'ansible-playbook', 'ansible-inventory')) {
     if (-not (Get-Command $command -ErrorAction SilentlyContinue)) {
         Write-Error "Required command not found: $command"
-        exit 2
+        $failed++
     }
+}
+
+if ($failed -gt 0) {
+    Write-Host "SUMMARY: $passed passed, $failed failed"
+    exit 2
 }
 
 Invoke-Test 'Inventory parses' {

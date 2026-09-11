@@ -26,13 +26,18 @@ run_check() {
 require_command() {
     command -v "$1" >/dev/null 2>&1 || {
         printf 'ERROR: Required command not found: %s\n' "$1" >&2
-        exit 2
+        failed=$((failed + 1))
     }
 }
 
 require_command ansible
 require_command ansible-playbook
 require_command ansible-inventory
+
+if (( failed > 0 )); then
+    printf '\nSUMMARY: %s passed, %s failed\n' "$passed" "$failed"
+    exit 2
+fi
 
 run_check "Inventory parses" \
     ansible-inventory -i "$INVENTORY" --list >/dev/null

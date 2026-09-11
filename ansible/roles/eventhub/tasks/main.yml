@@ -13,6 +13,7 @@
       - configuration_directory is string
       - application_port is defined
       - application_port | int > 0
+      - application_port | int <= 65535
       - eventhub_owner is defined
       - eventhub_group is defined
       - eventhub_setup_host | bool or eventhub_deploy_configuration | bool
@@ -20,6 +21,35 @@
       EventHub variables are incomplete. Define the application name,
       directories, positive application port, ownership, and an enabled
       setup or deploy operation.
+  tags:
+    - always
+
+- name: Validate setup package variables
+  ansible.builtin.assert:
+    that:
+      - debian_required_packages is defined
+      - redhat_required_packages is defined
+      - debian_docker_package is defined
+      - redhat_docker_package is defined
+    fail_msg: >-
+      Host setup package variables are missing. Define utility and Docker
+      package names in group_vars/all.yml.
+  when: eventhub_setup_host | bool
+  tags:
+    - always
+
+- name: Validate deployment image variables
+  ansible.builtin.assert:
+    that:
+      - docker_registry is defined
+      - backend_image is defined
+      - notification_worker_image is defined
+      - backend_image_tag is defined
+      - notification_worker_image_tag is defined
+    fail_msg: >-
+      Deployment image variables are missing. Define registry, image, and tag
+      values in group_vars/all.yml.
+  when: eventhub_deploy_configuration | bool
   tags:
     - always
 
