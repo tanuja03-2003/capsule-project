@@ -1,0 +1,15 @@
+---
+- name: Prepare EventHub application hosts
+  hosts: app_servers
+  become: true
+  gather_facts: true
+
+  vars:
+    eventhub_setup_host: true
+    eventhub_deploy_configuration: false
+
+  roles:
+    - role: eventhub
+      tags:
+        - setup
+        - eventhub

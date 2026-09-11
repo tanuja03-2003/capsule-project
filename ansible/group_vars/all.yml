@@ -1,0 +1,34 @@
+---
+# Non-secret EventHub defaults shared by the demonstration playbooks.
+# Keep passwords, tokens, and private keys out of this file.
+application_name: eventhub
+application_directory: /opt/eventhub
+configuration_directory: "{{ application_directory }}/config"
+environment_name: demo
+application_port: 3000
+eventhub_owner: root
+eventhub_group: root
+eventhub_setup_host: false
+eventhub_deploy_configuration: false
+
+# These are image references for host-side configuration documentation.
+# Kubernetes deployment remains owned by the existing Jenkins pipeline.
+docker_registry: docker.io
+backend_image: capstone_event_ticketingandvenueaccess-backend
+notification_worker_image: capstone_event_ticketingandvenueaccess-notification-service
+backend_image_tag: latest
+notification_worker_image_tag: latest
+
+# Packages are intentionally limited to host prerequisites and utilities.
+debian_required_packages:
+  - curl
+  - git
+  - python3
+  - python3-pip
+redhat_required_packages:
+  - curl
+  - git
+  - python3
+  - python3-pip
+debian_docker_package: docker.io
+redhat_docker_package: docker

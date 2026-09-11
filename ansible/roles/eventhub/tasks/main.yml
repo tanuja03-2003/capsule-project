@@ -1,0 +1,143 @@
+---
+# Host preparation is intentionally separate from Kubernetes deployment.
+# These tasks configure a Linux host for a later EventHub container workflow.
+
+- name: Validate EventHub role inputs
+  ansible.builtin.assert:
+    that:
+      - application_name is defined
+      - application_name is string
+      - application_directory is defined
+      - application_directory is string
+      - configuration_directory is defined
+      - configuration_directory is string
+      - application_port is defined
+      - application_port | int > 0
+      - eventhub_owner is defined
+      - eventhub_group is defined
+      - eventhub_setup_host | bool or eventhub_deploy_configuration | bool
+    fail_msg: >-
+      EventHub variables are incomplete. Define the application name,
+      directories, positive application port, ownership, and an enabled
+      setup or deploy operation.
+  tags:
+    - always
+
+- name: Validate supported Linux platform
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family in ['Debian', 'RedHat']
+    fail_msg: >-
+      Unsupported operating system family '{{ ansible_os_family }}'.
+      EventHub host automation supports Debian-family and Red Hat-family Linux.
+  when: eventhub_setup_host | bool
+  tags:
+    - always
+
+- name: Refresh APT package metadata
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  when:
+    - eventhub_setup_host | bool
+    - ansible_os_family == 'Debian'
+  tags:
+    - setup
+
+- name: Refresh DNF package metadata
+  ansible.builtin.dnf:
+    update_cache: true
+  when:
+    - eventhub_setup_host | bool
+    - ansible_os_family == 'RedHat'
+  tags:
+    - setup
+
+- name: Install required Debian packages
+  # Docker is installed separately so utility package changes never restart it.
+  ansible.builtin.package:
+    name: "{{ debian_required_packages }}"
+    state: present
+  when:
+    - eventhub_setup_host | bool
+    - ansible_os_family == 'Debian'
+  tags:
+    - setup
+
+- name: Install required Red Hat packages
+  ansible.builtin.package:
+    name: "{{ redhat_required_packages }}"
+    state: present
+  when:
+    - eventhub_setup_host | bool
+    - ansible_os_family == 'RedHat'
+  tags:
+    - setup
+
+- name: Install Docker on Debian-family hosts
+  ansible.builtin.package:
+    name: "{{ debian_docker_package }}"
+    state: present
+  when:
+    - eventhub_setup_host | bool
+    - ansible_os_family == 'Debian'
+  notify: eventhub_restart_docker
+  tags:
+    - setup
+
+- name: Install Docker on Red Hat-family hosts
+  ansible.builtin.package:
+    name: "{{ redhat_docker_package }}"
+    state: present
+  when:
+    - eventhub_setup_host | bool
+    - ansible_os_family == 'RedHat'
+  notify: eventhub_restart_docker
+  tags:
+    - setup
+
+- name: Enable and start Docker
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+  when: eventhub_setup_host | bool
+  tags:
+    - setup
+
+- name: Create EventHub application directory
+  ansible.builtin.file:
+    path: "{{ application_directory }}"
+    state: directory
+    owner: "{{ eventhub_owner }}"
+    group: "{{ eventhub_group }}"
+    mode: '0755'
+  when:
+    - eventhub_setup_host | bool or eventhub_deploy_configuration | bool
+  tags:
+    - setup
+    - deploy
+
+- name: Create EventHub configuration directory
+  ansible.builtin.file:
+    path: "{{ configuration_directory }}"
+    state: directory
+    owner: "{{ eventhub_owner }}"
+    group: "{{ eventhub_group }}"
+    mode: '0750'
+  when:
+    - eventhub_setup_host | bool or eventhub_deploy_configuration | bool
+  tags:
+    - setup
+    - deploy
+
+- name: Render non-secret EventHub host configuration
+  ansible.builtin.template:
+    src: eventhub.env.j2
+    dest: "{{ configuration_directory }}/eventhub.env"
+    owner: "{{ eventhub_owner }}"
+    group: "{{ eventhub_group }}"
+    mode: '0640'
+  when: eventhub_deploy_configuration | bool
+  tags:
+    - deploy

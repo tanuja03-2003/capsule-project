@@ -1,0 +1,15 @@
+---
+- name: Deploy EventHub host configuration
+  hosts: app_servers
+  become: true
+  gather_facts: true
+
+  vars:
+    eventhub_setup_host: false
+    eventhub_deploy_configuration: true
+
+  roles:
+    - role: eventhub
+      tags:
+        - deploy
+        - eventhub
